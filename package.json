@@ -10,13 +10,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/goitacademy/parcel-project-template.git"
+    "url": "git+https://github.com/Roza-krist/goit-js-hw-08"
   },
   "keywords": [],
   "author": "Roza <rozakristjuhan@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/goitacademy/parcel-project-template/issues"
+    "url": "https://github.com/Roza-krist/goit-js-hw-08/issues"
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.5",
