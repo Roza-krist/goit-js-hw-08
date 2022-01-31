@@ -1,60 +1,40 @@
 import throttle from 'lodash.throttle';
+const form = document.querySelector('.feedback-form');
+const inputEl = document.querySelector('.feedback-form input');
+const commentEl = document.querySelector('.feedback-form textarea');
+const LOCALSTORAGE_KEY = 'feedback-form-state';
+const formValuesStorage = {};
 
-class Feedback {
-  static STORAGE_KEY = 'feedback-form-state';
-  static formData = {};
+form.addEventListener('submit', onFormSubmit);
+form.addEventListener('input', throttle(onFormInputs, 500));
 
-  constructor(form, textarea) {
-    this.$form = document.querySelector(form);
-    this.$textarea = document.querySelector(textarea);
-    this.addFormEvents();
-    this.saveUserData();
-  }
+function onFormSubmit(e) {
+  e.preventDefault();
 
-  addFormEvents() {
-    let formSubmitArrowFunc = this.onFormSubmit.bind(this);
-    let formInputArrowFunc = this.onTextareaInput.bind(this);
+  const formData = new FormData(e.currentTarget);
 
-    this.$form.addEventListener('submit', formSubmitArrowFunc);
-    this.$form.addEventListener('input', throttle(formInputArrowFunc, 500));
-
-    this.$form.addEventListener('input', e => {
-      Feedback.formData[e.target.name] = e.target.value;
-    });
-  }
-
-  saveUserData() {
-    const userData = localStorage.getItem(Feedback.STORAGE_KEY);
-
-    const setElemValue = this.$form.elements;
-
-    if (userData) {
-      const userParseJSON = JSON.parse(userData);
-
-      setElemValue.email.value = userParseJSON.email;
-      setElemValue.message.value = userParseJSON.message;
+  formData.forEach((value, name) => {
+    if (value === '') {
+      alert('no empty fields allowed');
     }
-  }
-
-  onFormSubmit = e => {
-    e.preventDefault();
-
-    const userData = localStorage.getItem(Feedback.STORAGE_KEY);
-    const userParseJSON = JSON.parse(userData);
-
-    e.currentTarget.reset();
-    localStorage.removeItem(Feedback.STORAGE_KEY);
-
-    console.log(userParseJSON);
-  };
-
-  onTextareaInput = () => {
-    const userDataJSON = JSON.stringify(Feedback.formData);
-
-    localStorage.setItem(Feedback.STORAGE_KEY, userDataJSON);
-  };
+    console.log('name:', name);
+    console.log('value:', value);
+  });
+  e.target.reset();
+  localStorage.removeItem(LOCALSTORAGE_KEY);
 }
 
-const userFeedback = new Feedback('.feedback-form', '.feedback-form textarea');
+function onFormInputs(e) {
+  formValuesStorage[e.target.name] = e.target.value;
+  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(formValuesStorage));
+}
 
-console.log(userFeedback);
+function fillComment() {
+  const savedFormData = localStorage.getItem(LOCALSTORAGE_KEY);
+  const parsedFormData = JSON.parse(savedFormData);
+  if (parsedFormData) {
+    inputEl.value = parsedFormData.email || '';
+    commentEl.value = parsedFormData.message || '';
+  }
+}
+fillComment();
