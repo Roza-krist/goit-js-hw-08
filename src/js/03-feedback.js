@@ -1,40 +1,34 @@
-import throttle from 'lodash.throttle';
-const form = document.querySelector('.feedback-form');
-const inputEl = document.querySelector('.feedback-form input');
-const commentEl = document.querySelector('.feedback-form textarea');
+import throttle from 'lodash/throttle';
+const formRef = document.querySelector('.feedback-form');
+const emailRef = document.querySelector('input[name=email]');
+const messageRef = document.querySelector('textarea[name=message]');
 const LOCALSTORAGE_KEY = 'feedback-form-state';
-const formValuesStorage = {};
+const localStorageData = JSON.parse(localStorage.getItem(LOCALSTORAGE_KEY));
 
-form.addEventListener('submit', onFormSubmit);
-form.addEventListener('input', throttle(onFormInputs, 500));
-
-function onFormSubmit(e) {
-  e.preventDefault();
-
-  const formData = new FormData(e.currentTarget);
-
-  formData.forEach((value, name) => {
-    if (value === '') {
-      alert('no empty fields allowed');
-    }
-    console.log('name:', name);
-    console.log('value:', value);
-  });
-  e.target.reset();
-  localStorage.removeItem(LOCALSTORAGE_KEY);
+if (localStorageData) {
+  emailRef.value = localStorageData.email;
+  messageRef.value = localStorageData.message;
 }
 
-function onFormInputs(e) {
-  formValuesStorage[e.target.name] = e.target.value;
-  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(formValuesStorage));
+formRef.addEventListener('input', throttle(saveFeedbackData, 500));
+formRef.addEventListener('submit', handleSubmit);
+
+function saveFeedbackData() {
+  let feedbackObj = createObject(emailRef.value, messageRef.value);
+  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(feedbackObj));
+}
+function createObject(email, message) {
+  const user = {
+    email,
+    message,
+  };
+  return user;
 }
 
-function fillComment() {
-  const savedFormData = localStorage.getItem(LOCALSTORAGE_KEY);
-  const parsedFormData = JSON.parse(savedFormData);
-  if (parsedFormData) {
-    inputEl.value = parsedFormData.email || '';
-    commentEl.value = parsedFormData.message || '';
-  }
+function handleSubmit(event) {
+  event.preventDefault();
+  console.log(createObject(emailRef.value, messageRef.value));
+  emailRef.value = '';
+  messageRef.value = '';
+  localStorage.clear();
 }
-fillComment();
